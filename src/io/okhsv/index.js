@@ -5,12 +5,18 @@ const input = require('../input');
 const { srgb_to_okhsv, okhsv_to_srgb } = require('../../utils/okhsl-okhsv');
 
 Color.prototype.okhsv = function () {
-    return srgb_to_okhsv(this._rgb);
+    const coordinates = srgb_to_okhsv(...this._rgb);
+    coordinates[0] = coordinates[0] * 180;
+    coordinates[1] = Math.min(coordinates[1], 1);
+    coordinates[2] = Math.min(coordinates[2], 1);
+    return coordinates;
 };
 
 chroma.okhsv = (...args) => new Color(...args, 'okhsv');
 
-input.format.okhsv = okhsv_to_srgb;
+input.format.okhsv = args => {
+    return okhsv_to_srgb(args[0] / 180, args[1], args[2]);
+};
 
 input.autodetect.push({
     p: 3,

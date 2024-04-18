@@ -1991,6 +1991,27 @@
 
     var okhslOkhsv = {};
 
+    /*
+    https://github.com/bottosson/bottosson.github.io/blob/master/misc/colorpicker/colorconversion.js
+
+    Copyright (c) 2020 Björn Ottosson
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is furnished to do
+    so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    */
+
     function srgb_transfer_function(a) {
         return 0.0031308 >= a ? 12.92 * a : 1.055 * Math.pow(a, 0.4166666666666667) - 0.055;
     }
@@ -2445,15 +2466,15 @@
         var T = ST_max[1];
         var k = 1 - S_0 / S_max;
 
-        t = T / (C + L * T);
+        var t = T / (C + L * T);
         var L_v = t * L;
         var C_v = t * C;
 
-        L_vt = toe_inv(L_v);
-        C_vt = (C_v * L_vt) / L_v;
+        var L_vt = toe_inv(L_v);
+        var C_vt = (C_v * L_vt) / L_v;
 
-        rgb_scale = oklab_to_linear_srgb(L_vt, a_ * C_vt, b_ * C_vt);
-        scale_L = Math.cbrt(1 / Math.max(rgb_scale[0], rgb_scale[1], rgb_scale[2], 0));
+        var rgb_scale = oklab_to_linear_srgb(L_vt, a_ * C_vt, b_ * C_vt);
+        var scale_L = Math.cbrt(1 / Math.max(rgb_scale[0], rgb_scale[1], rgb_scale[2], 0));
 
         L = L / scale_L;
         C = C / scale_L;
@@ -2461,8 +2482,8 @@
         C = (C * toe(L)) / L;
         L = toe(L);
 
-        v = L / L_v;
-        s = ((S_0 + T) * C_v) / (T * S_0 + T * k * C_v);
+        var v = L / L_v;
+        var s = ((S_0 + T) * C_v) / (T * S_0 + T * k * C_v);
 
         return [h, s, v];
     }
@@ -2481,7 +2502,11 @@
     var okhsl_to_srgb = okhslOkhsv.okhsl_to_srgb;
 
     Color$o.prototype.okhsl = function () {
-        return srgb_to_okhsl(this._rgb);
+        var coordinates = srgb_to_okhsl.apply(void 0, this._rgb);
+        coordinates[0] = coordinates[0] * 180;
+        coordinates[1] = Math.min(coordinates[1], 1);
+        coordinates[2] = Math.min(coordinates[2], 1);
+        return coordinates;
     };
 
     chroma$6.okhsl = function () {
@@ -2491,7 +2516,9 @@
         return new (Function.prototype.bind.apply( Color$o, [ null ].concat( args, ['okhsl']) ));
     };
 
-    input$1.format.okhsl = okhsl_to_srgb;
+    input$1.format.okhsl = function (args) {
+        return okhsl_to_srgb(args[0] / 180, args[1], args[2]);
+    };
 
     input$1.autodetect.push({
         p: 3,
@@ -2515,7 +2542,11 @@
     var okhsv_to_srgb = okhslOkhsv.okhsv_to_srgb;
 
     Color$n.prototype.okhsv = function () {
-        return srgb_to_okhsv(this._rgb);
+        var coordinates = srgb_to_okhsv.apply(void 0, this._rgb);
+        coordinates[0] = coordinates[0] * 180;
+        coordinates[1] = Math.min(coordinates[1], 1);
+        coordinates[2] = Math.min(coordinates[2], 1);
+        return coordinates;
     };
 
     chroma$5.okhsv = function () {
@@ -2525,7 +2556,9 @@
         return new (Function.prototype.bind.apply( Color$n, [ null ].concat( args, ['okhsv']) ));
     };
 
-    input.format.okhsv = okhsv_to_srgb;
+    input.format.okhsv = function (args) {
+        return okhsv_to_srgb(args[0] / 180, args[1], args[2]);
+    };
 
     input.autodetect.push({
         p: 3,
